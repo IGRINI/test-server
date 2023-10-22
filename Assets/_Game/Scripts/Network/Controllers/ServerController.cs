@@ -12,10 +12,8 @@ namespace Game.Network
     {
         private const string START_IP = "192.168.31.149";
         private const ushort START_PORT = 30502;
-        
-        public IEnumerable<ClientData> Clients => _clients;
-        
-        private readonly List<ClientData> _clients = new();
+
+        public readonly List<ClientData> Clients = new();
 
         private CancellationTokenSource _loopToken;
 
@@ -63,6 +61,7 @@ namespace Game.Network
             if (_loopThreadActive)
                 return;
 
+            _loopThreadActive = true;
             _ = UniTask.RunOnThreadPool(Update, false, _loopToken.Token);
         }
 
@@ -75,10 +74,10 @@ namespace Game.Network
 
         public void OnDisconnected(ushort connectionIndex, ulong guid, DisconnectReason reason, string message)
         {
-            if (_clients[connectionIndex] != null && _clients[connectionIndex].Guid == guid)
+            if (Clients[connectionIndex] != null && Clients[connectionIndex].Guid == guid)
             {
-                Debug.Log("[Server] Client " + _clients[connectionIndex].NickName + " disconnected! (" + reason + ")");
-                _clients.RemoveAt(connectionIndex);
+                Debug.Log("[Server] Client " + Clients[connectionIndex].NickName + " disconnected! (" + reason + ")");
+                Clients.RemoveAt(connectionIndex);
             }
             else
             {
@@ -92,8 +91,10 @@ namespace Game.Network
             {
                 case GamePacketID.CLIENT_DATA_REPLY:
                     var playerName = bitStream.ReadString();
+                    var authTicket = bitStream.ReadString();
+                    Debug.Log(authTicket);
 
-                    _clients.Add(new ClientData(guid, playerName));
+                    Clients.Add(new ClientData(guid, playerName));
 
                     using(var bsOut = PooledBitStream.GetBitStream())
                     {
@@ -107,7 +108,7 @@ namespace Game.Network
                     using(var bsOut = PooledBitStream.GetBitStream())
                     {
                         bsOut.Write((byte)GamePacketID.SERVER_CHAT_MESSAGE);
-                        bsOut.Write(_clients.First(x => x.Guid == guid).NickName);
+                        bsOut.Write(Clients.First(x => x.Guid == guid).NickName);
                         bsOut.Write(text);
                         RakServer.SendToAllIgnore(bsOut, guid, PacketPriority.LOW_PRIORITY, PacketReliability.RELIABLE);
                     }

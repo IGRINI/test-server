@@ -75,3 +75,8 @@ InitTestScene*.unity
 
 .idea/
 .vsconfig
+Assets/Plugins/Zenject/OptionalExtras/Signals/Zenject-Signals.csproj.meta
+
+Assets/Plugins/Zenject/Source/Zenject.csproj.meta
+
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset

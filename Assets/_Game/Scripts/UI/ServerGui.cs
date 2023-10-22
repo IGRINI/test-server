@@ -30,7 +30,7 @@ namespace Game.Utils
                     _serverController.Stop();
                 }
 
-                GUILayout.Box("Connected clients");
+                GUILayout.Box($"Connected clients ({_serverController.Clients.Count}):");
 
                 foreach (var data in _serverController.Clients)
                 {
